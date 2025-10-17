@@ -45,12 +45,15 @@ class Database:
     def upsert_areas(self, areas_data: List[Dict]) -> None:
         """Вставка/обновление регионов"""
         insert_query = """
-            INSERT INTO areas (id, name, parent_id, url)
-            VALUES (%(id)s, %(name)s, %(parent_id)s, %(url)s)
+            INSERT INTO areas (id, name, parent_id, url, utc_offset, lat, lng)
+            VALUES (%(id)s, %(name)s, %(parent_id)s, %(url)s, %(utc_offset)s, %(lat)s, %(lng)s)
             ON CONFLICT (id) 
             DO UPDATE SET 
                 name = EXCLUDED.name,
-                url = EXCLUDED.url
+                url = EXCLUDED.url,
+                utc_offset = EXCLUDED.utc_offset,
+                lat = EXCLUDED.lat,
+                lng = EXCLUDED.lng
         """
         try:
             with self.conn.cursor() as cur:
@@ -92,6 +95,11 @@ class Database:
     
     def upsert_employer(self, employer_data: Dict) -> None:
         """Вставка/обновление работодателя"""
+        # Пропускаем, если нет ID работодателя
+        if not employer_data.get('id'):
+            logger.warning("Пропуск работодателя без ID")
+            return
+        
         query = """
             INSERT INTO employers (
                 id, name, url, alternate_url, logo_original, logo_90, logo_240,
@@ -123,6 +131,7 @@ class Database:
             self.conn.rollback()
             logger.error(f"Ошибка при вставке работодателя {employer_data.get('id')}: {e}")
             raise
+
     
     def upsert_vacancy(self, vacancy_data: Dict, professional_roles: List[int]) -> None:
         """Вставка/обновление вакансии с версионированием"""

@@ -14,12 +14,15 @@ CREATE TABLE IF NOT EXISTS professional_roles (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Таблица регионов (areas)
+-- Таблица регионов (areas) с дополнительными полями
 CREATE TABLE IF NOT EXISTS areas (
     id INTEGER PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     parent_id INTEGER REFERENCES areas(id),
     url TEXT,
+    utc_offset VARCHAR(10),  -- Новое поле
+    lat DECIMAL(10, 7),      -- Новое поле
+    lng DECIMAL(10, 7),      -- Новое поле
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -135,6 +138,8 @@ CREATE INDEX IF NOT EXISTS idx_vacancies_employer ON vacancies(employer_id);
 CREATE INDEX IF NOT EXISTS idx_vacancies_archived ON vacancies(archived);
 CREATE INDEX IF NOT EXISTS idx_vacancies_published ON vacancies(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_vacancies_parsed ON vacancies(parsed_at DESC);
-CREATE INDEX IF NOT EXISTS idx_vacancies_salary FROM vacancies(salary_from) WHERE salary_from IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_vacancies_salary ON vacancies(salary_from) WHERE salary_from IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_employers_name ON employers(name);
+CREATE INDEX IF NOT EXISTS idx_areas_parent ON areas(parent_id);
 CREATE INDEX IF NOT EXISTS idx_areas_name ON areas(name);
+CREATE INDEX IF NOT EXISTS idx_areas_coordinates ON areas(lat, lng) WHERE lat IS NOT NULL AND lng IS NOT NULL;

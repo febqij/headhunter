@@ -16,7 +16,7 @@ DB_CONFIG = {
 HH_API_CONFIG = {
     'base_url': 'https://api.hh.ru',
     'vacancies_endpoint': '/vacancies',
-    'areas_endpoint': '/salary_statistics/dictionaries/salary_areas',
+    'areas_endpoint': '/areas',
     'professional_roles_endpoint': '/professional_roles',
     'timeout': 10,
     'per_page': 100,  # Максимум 100
@@ -26,13 +26,18 @@ HH_API_CONFIG = {
 
 # Parser configuration
 PARSER_CONFIG = {
-    'area': os.getenv('HH_AREA', '113'),  # 113 = Россия
+    'area': os.getenv('HH_AREA', '113').split(','),  # Преобразует в список
     'text': os.getenv('HH_SEARCH_TEXT', ''),  # Поисковый запрос
     'search_field': os.getenv('HH_SEARCH_FIELD', 'name'),  # name, description, company_name
     'experience': os.getenv('HH_EXPERIENCE', ''),  # noExperience, between1And3, between3And6, moreThan6
     'employment': os.getenv('HH_EMPLOYMENT', ''),  # full, part, project, volunteer, probation
     'schedule': os.getenv('HH_SCHEDULE', '')  # fullDay, shift, flexible, remote, flyInFlyOut
 }
+
+# Project paths
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCRIPTS_DIR = os.path.join(BASE_DIR, 'scripts')
+SCHEMA_FILE = os.path.join(SCRIPTS_DIR, 'schema.sql')
 
 # Logging configuration
 LOG_CONFIG = {
