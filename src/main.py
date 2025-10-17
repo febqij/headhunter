@@ -81,7 +81,7 @@ def main():
     try:
         with Database() as db:
             # Раскомментируйте для первого запуска
-            initialize_database(db)
+            # initialize_database(db)
             
             # Парсинг вакансий
             parse_vacancies(db)

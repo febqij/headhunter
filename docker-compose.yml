@@ -1,26 +1,26 @@
-version: '3.9'
+version: '3.8'
 
 services:
   postgres:
-    container_name: headhunter_db
     image: postgres:16-alpine
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
+    container_name: headhunter_db
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      PGDATA: /var/lib/postgresql/data/pgdata
+      # Устанавливаем search_path для всей БД
+      POSTGRES_INITDB_ARGS: "-c shared_preload_libraries=pg_stat_statements"
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
+      - headhunter_data:/var/lib/postgresql/data
+      # Подключаем скрипт инициализации
+      - ./scripts/init_schema.sql:/docker-entrypoint-initdb.d/01_init_schema.sql
+    restart: unless-stopped
+    command: 
+      - "postgres"
+      - "-c"
+      - "search_path=headhunter,public"  # Устанавливаем search_path
 
 volumes:
-  postgres_data:
-    driver: local
+  headhunter_data:

@@ -4,19 +4,26 @@ from psycopg2.extensions import connection
 import logging
 from typing import List, Dict, Optional, Any
 from datetime import datetime
-from config import DB_CONFIG
+from config import DB_CONFIG, DB_SCHEMA
 
 logger = logging.getLogger(__name__)
 
 class Database:
     def __init__(self):
         self.conn: Optional[connection] = None
+        self.schema = DB_SCHEMA
         
     def connect(self) -> None:
-        """Устанавливает соединение с БД"""
+        """Устанавливает соединение с БД и устанавливает search_path"""
         try:
             self.conn = psycopg2.connect(**DB_CONFIG)
-            logger.info("Успешное подключение к базе данных")
+            
+            # Явная установка search_path для сессии
+            with self.conn.cursor() as cur:
+                cur.execute(f"SET search_path TO {self.schema}, public;")
+                self.conn.commit()
+            
+            logger.info(f"Успешное подключение к базе данных (schema: {self.schema})")
         except psycopg2.Error as e:
             logger.error(f"Ошибка подключения к БД: {e}")
             raise
